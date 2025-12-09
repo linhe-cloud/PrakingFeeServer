@@ -1,0 +1,45 @@
+NEW_FILE_CODE
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.charge.mapper.ParkingIotMapper">
+
+    <resultMap id="ParkingIotResultMap" type="com.charge.entity.ParkingIot">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="billingType" column="billing_type"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="maxDailyAmount" column="max_daily_amount"/>
+        <result property="freeMinutes" column="free_minutes"/>
+        <result property="status" column="status"/>
+        <result property="openTime" column="open_time"/>
+        <result property="remark" column="remark"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="updatedTime" column="updated_time"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="ParkingIotResultMap">
+        SELECT
+            id, code, name,
+            billing_type, unit_price, max_daily_amount, free_minutes,
+            status, open_time, remark,
+            created_time, updated_time, created_by, updated_by
+        FROM parking_lot
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByCode" resultMap="ParkingIotResultMap">
+        SELECT
+            id, code, name,
+            billing_type, unit_price, max_daily_amount, free_minutes,
+            status, open_time, remark,
+            created_time, updated_time, created_by, updated_by
+        FROM parking_lot
+        WHERE code = #{code}
+    </select>
+</mapper>
