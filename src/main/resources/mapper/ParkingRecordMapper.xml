@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.charge.mapper.ParkingRecordMapper">
+
+    <resultMap id="ParkingRecordResultMap" type="com.charge.entity.ParkingRecord">
+        <id property="id" column="id"/>
+        <result property="plateNumber" column="plate_number"/>
+        <result property="parkingLotId" column="parking_lot_id"/>
+        <result property="inTime" column="in_time"/>
+        <result property="outTime" column="out_time"/>
+        <result property="paidAmount" column="paid_amount"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="updatedTime" column="updated_time"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="ParkingRecordResultMap">
+        SELECT
+            id,
+            plate_number,
+            parking_lot_id,
+            in_time,
+            out_time,
+            paid_amount,
+            status,
+            remark,
+            created_time,
+            updated_time
+        FROM parking_record
+        WHERE id = #{id}
+    </select>
+
+    <update id="updateById">
+        UPDATE parking_record
+        <set>
+            <if test="plateNumber != null">plate_number = #{plateNumber},</if>
+            <if test="parkingLotId != null">parking_lot_id = #{parkingLotId},</if>
+            <if test="inTime != null">in_time = #{inTime},</if>
+            <if test="outTime != null">out_time = #{outTime},</if>
+            <if test="paidAmount != null">paid_amount = #{paidAmount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO parking_record (
+            plate_number,
+            parking_lot_id,
+            in_time,
+            status,
+            remark,
+            created_time,
+            updated_time
+        ) VALUES (
+            #{plateNumber},
+            #{parkingLotId},
+            #{inTime},
+            #{status},
+            #{remark},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+</mapper>

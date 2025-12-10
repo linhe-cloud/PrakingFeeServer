@@ -14,6 +14,11 @@ public class CalculateFeeResponse {
     private Long inRecordId;
 
     /**
+     * 订单ID
+     */
+    private Long orderId;
+
+    /**
      * 停车时长（分钟）
      */
     private long parkingMinutes;
@@ -39,6 +44,13 @@ public class CalculateFeeResponse {
 
     public void setInRecordId(Long inRecordId) {
         this.inRecordId = inRecordId;
+    }
+
+    public Long getOrderId() {
+        return orderId;
+    }
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 
     public long getParkingMinutes() {

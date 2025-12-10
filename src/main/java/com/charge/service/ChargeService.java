@@ -2,6 +2,8 @@ package com.charge.service;
 
 import com.charge.entity.DTO.CalculateFeeRequest;
 import com.charge.entity.VO.CalculateFeeResponse;
+import com.charge.entity.DTO.ConfirmPaymentRequest;
+
 
 /**
  * 计费服务接口
@@ -9,10 +11,13 @@ import com.charge.entity.VO.CalculateFeeResponse;
  */
 public interface ChargeService {
     /**
-     * 根据入场记录ID计算停车费用
-     * @param inRecordId 入场记录ID
-     * @return 停车费用
+     * 出场计费：计算金额 + 写出场时间 + 生成未支付订单
      */
     CalculateFeeResponse calculateParkingFee(CalculateFeeRequest request);
+
+    /**
+     * 支付成功确认：更新订单为以支付，并写入入场记录的支付状态
+     */
+    void confirmPayment(ConfirmPaymentRequest request);
     
-}
+} 
