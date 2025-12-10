@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.charge.mapper.ChargeOrderMapper">
+
+    <resultMap id="ChargeOrderResultMap" type="com.charge.entity.ChargeOrder">
+        <id property="id" column="id"/>
+        <result property="inRecordId" column="in_record_id"/>
+        <result property="amount" column="amount"/>
+        <result property="payStatus" column="pay_status"/>
+        <result property="outTime" column="out_time"/>
+        <result property="createTime" column="create_time"/>        
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO charge_order (
+            in_record_id,
+            amount,
+            pay_status,
+            out_time,
+            create_time
+        ) VALUES (
+            #{inRecordId},
+            #{amount},
+            #{payStatus},
+            #{outTime},
+            NOW()
+        )
+    </insert>
+
+    <select id="selectById" resultMap="ChargeOrderResultMap">
+        SELECT
+            id,
+            in_record_id,
+            amount,
+            pay_status,
+            out_time,
+            create_time
+        FROM charge_order
+        WHERE id = #{id}
+    </select>
+
+    <update id="updateById">
+        UPDATE charge_order
+        SET
+            in_record_id = #{inRecordId},
+            amount = #{amount},
+            pay_status = #{payStatus},
+            out_time = #{outTime},
+            create_time = #{createTime}
+        WHERE id = #{id}
+    </update>
+    
+</mapper>

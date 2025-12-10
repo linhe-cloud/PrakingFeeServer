@@ -9,7 +9,6 @@ import com.charge.entity.ParkingIot;
 public interface ParkingIotMapper {
 
     ParkingIot selectById(@Param("id") Long id);
-
     ParkingIot selectByCode(@Param("code") String code);
 
 }
