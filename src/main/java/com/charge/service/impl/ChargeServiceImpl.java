@@ -5,12 +5,18 @@ import com.charge.entity.DTO.ConfirmPaymentRequest;
 import com.charge.entity.VO.CalculateFeeResponse;
 import com.charge.entity.ParkingRecord;
 import com.charge.entity.ChargeOrder;
+import com.charge.entity.ChargeRule;
 import com.charge.entity.ParkingIot;
+
+import com.charge.service.ChargeRuleService;
+import com.charge.service.ChargeService;
+
 import com.charge.mapper.ParkingRecordMapper;
 import com.charge.mapper.ChargeOrderMapper;
 import com.charge.mapper.ParkingIotMapper;
-import com.charge.service.ChargeService;
+
 import com.common.exception.BusinessException;
+
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,13 +34,16 @@ public class ChargeServiceImpl implements ChargeService {
     private final ParkingRecordMapper parkingRecordMapper;
     private final ParkingIotMapper parkingIotMapper;
     private final ChargeOrderMapper chargeOrderMapper;
+    private final ChargeRuleService chargeRuleService;
 
     public ChargeServiceImpl(ParkingRecordMapper parkingRecordMapper,
                              ParkingIotMapper parkingIotMapper,
-                             ChargeOrderMapper chargeOrderMapper) {
+                             ChargeOrderMapper chargeOrderMapper,
+                             ChargeRuleService chargeRuleService) {
         this.parkingRecordMapper = parkingRecordMapper;
         this.parkingIotMapper = parkingIotMapper;
         this.chargeOrderMapper = chargeOrderMapper;
+        this.chargeRuleService = chargeRuleService;
     }
 
     /**
@@ -56,34 +65,66 @@ public class ChargeServiceImpl implements ChargeService {
             throw new BusinessException("出场时间不能早于入场时间");
         }
 
-        // 3. 计算停车时长（分钟）
+        // 3. 计算停车时长(分钟)
         long minutes = Duration.between(inTime, outTime).toMinutes();
         if (minutes <= 0) {
             minutes = 1; // 至少1分钟
         }
 
-        // 4. 根据车场信息计算基础金额
-        ParkingIot parkingIot = parkingIotMapper.selectById(inRecord.getParkingIotId());
-        Integer unitPrice = parkingIot.getUnitPrice(); // 假设是 500 表示 5.00 元/小时
-        if (unitPrice == null || unitPrice <= 0) {
-            throw new BusinessException("车场未配置有效单价");
+        Long parkingIotId = inRecord.getParkingIotId();
+        if (parkingIotId == null) {
+            throw new BusinessException("停车记录未关联车场,id=" + inRecord.getId());
         }
 
-        // 计算金额（单位：分）
-        long amountInCents;
-
-        // 实现“前30分钟免费”的计费规则
-        if (minutes <= 30) {
-            amountInCents = 0; // 免费
+        // 4. 提前计算计费规则名称,用于幂等性检查和正常流程
+        String feeRuleName;
+        ChargeRule rule = chargeRuleService.getApplicableRule(parkingIotId);
+        if (rule != null) {
+            feeRuleName = rule.getRuleName();
         } else {
-            // 超过30分钟：从第31分钟开始计费，按小时向上取整
-            long chargeableMinutes = minutes - 30;          // 扣除免费30分钟
-            long hours = (chargeableMinutes + 59) / 60;     // 向上取整
-            amountInCents = hours * unitPrice;              // 计算金额（单位：分）
-            
-            // 如果正好30分01秒，也会变成1小时
+            feeRuleName = "前30分钟免费,之后按小时计费"; // 默认规则名称
         }
 
+        // ========= 幂等性检查:同一入场记录 + 同一出场时间,直接返回已有订单 ========
+        ChargeOrder exisOrder = chargeOrderMapper.selectByInRecordIdAndOutTime(inRecord.getId(), outTime);
+        if (exisOrder != null) {
+            // 已有订单,直接组装响应返回
+            CalculateFeeResponse resp = new CalculateFeeResponse();
+            resp.setInRecordId(inRecord.getId());
+            resp.setOrderId(exisOrder.getId());
+            resp.setParkingMinutes(minutes);
+            resp.setAmount(exisOrder.getAmount());
+            resp.setFeeRuleName(feeRuleName);
+            resp.setRealOutTime(outTime);
+            return resp;
+        }
+        // ========= 幂等性检查结束 =========
+
+
+        //=========第一次消费逻辑=========
+
+        long amountInCents;     // 计算金额(单位:分)
+
+        // 5. 根据计费规则计算金额
+        if (rule != null) {
+            amountInCents = chargeRuleService.calculateAmount(rule, minutes);
+        } else {
+            ParkingIot parkingIot = parkingIotMapper.selectById(inRecord.getParkingIotId());
+            Integer unitPrice = parkingIot.getUnitPrice(); // 假设是 500 表示 5.00 元/小时
+            if (unitPrice == null || unitPrice <= 0) {
+                throw new BusinessException("车场未配置有效单价");
+            }
+            // 实现“前30分钟免费”的计费规则
+            if (minutes <= 30) {
+                amountInCents = 0; // 免费
+            } else {
+                // 超过30分钟：从第31分钟开始计费，按小时向上取整
+                long chargeableMinutes = minutes - 30;          // 扣除免费30分钟
+                long hours = (chargeableMinutes + 59) / 60;     // 向上取整
+                amountInCents = hours * unitPrice;              // 计算金额（单位：分）
+                // 如果正好30分01秒，也会变成1小时
+            }
+        }
 
         // 5. 生成收费订单并入库
         ChargeOrder order = new ChargeOrder();
@@ -103,7 +144,7 @@ public class ChargeServiceImpl implements ChargeService {
         resp.setInRecordId(inRecord.getId());
         resp.setParkingMinutes(minutes);
         resp.setAmount(amountInCents);
-        resp.setFeeRuleName("前30分钟免费，之后按小时计费");
+        resp.setFeeRuleName(feeRuleName);
         resp.setRealOutTime(outTime);
         return resp;
     }

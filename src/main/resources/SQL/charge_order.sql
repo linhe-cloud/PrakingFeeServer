@@ -8,4 +8,5 @@ CREATE TABLE IF NOT EXISTS charge_order (
 
     PRIMARY KEY (id),
     KEY idx_in_record (in_record_id)
+    UNIQUE KEY uk_in_record_out_time (in_record_id, out_time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='收费订单表';

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.charge.mapper.ChargeRuleMapper">
+
+    <resultMap id="ChargeRuleResultMap" type="com.charge.entity.ChargeRule">
+        <id property="id" column="id"/>
+        <result property="parkingIotId" column="parking_iot_id"/>
+        <result property="ruleName" column="rule_name"/>
+        <result property="carType" column="car_type"/>
+        <result property="chargeMode" column="charge_mode"/>
+        <result property="freeMinutes" column="free_minutes"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="maxAmountPerDay" column="max_amount_per_day"/>
+        <result property="maxAmountPerSession" column="max_amount_per_session"/>
+        <result property="effectiveStartDate" column="effective_start_date"/>
+        <result property="effectiveEndDate" column="effective_end_date"/>
+        <result property="effectiveTimeRange" column="effective_time_range"/>
+        <result property="priority" column="priority"/>
+        <result property="status" column="status"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="updatedTime" column="updated_time"/>
+    </resultMap>
+
+    <select id="selectValidRulesByParkingIot" resultMap="ChargeRuleResultMap">
+        SELECT
+            id, parking_iot_id, rule_name, car_type, charge_mode,
+            free_minutes, unit_price, max_amount_per_day, max_amount_per_session,
+            effective_start_date, effective_end_date, effective_time_range,
+            priority, status, created_time, updated_time
+        FROM
+            charge_rule
+        WHERE
+            parking_iot_id = #{parkingIotId}
+            AND status = 1
+            AND (effective_start_date IS NULL OR effective_start_date &lt;= #{currentDate})
+            AND (effective_end_date IS NULL OR effective_end_date &gt;= #{currentDate})
+        ORDER BY
+            priority DESC, id ASC
+    </select>
+
+    <select id="selectById" resultMap="ChargeRuleResultMap">
+        SELECT * FROM charge_rule WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.charge.entity.ChargeRule">
+        INSERT INTO charge_rule (
+            parking_iot_id, rule_name, car_type, charge_mode,
+            free_minutes, unit_price,
+            max_amount_per_day, max_amount_per_session,
+            effective_start_date, effective_end_date, effective_time_range,
+            priority, status
+        ) VALUES (
+            #{parkingiotId}, #{ruleName}, #{carType}, #{chargeMode},
+            #{freeMinutes}, #{unitPrice},
+            #{maxAmountPerDay}, #{maxAmountPerSession},
+            #{effectiveStartDate}, #{effectiveEndDate}, #{effectiveTimeRange},
+            #{priority}, #{status}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.charge.entity.ChargeRule">
+        UPDATE charge_rule
+        SET
+            parking_iot_id = #{parkingiotId},
+            rule_name = #{ruleName},
+            car_type = #{carType},
+            charge_mode = #{chargeMode},
+            free_minutes = #{freeMinutes},
+            unit_price = #{unitPrice},
+            max_amount_per_day = #{maxAmountPerDay},
+            max_amount_per_session = #{maxAmountPerSession},
+            effective_start_date = #{effectiveStartDate},
+            effective_end_date = #{effectiveEndDate},
+            effective_time_range = #{effectiveTimeRange},
+            priority = #{priority},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 管理端: 查询某车场的所有规则 -->
+    <select id="selectByParkingIot" resultMap="ChargeRuleResultMap">
+        SELECT
+            id,
+            parking_iot_id,
+            rule_name,
+            car_type,
+            charge_mode,
+            free_minutes,
+            unit_price,
+            max_amount_per_day,
+            max_amount_per_session,
+            effective_start_date,
+            effective_end_date,
+            effective_time_range,
+            priority,
+            status,
+            created_time,
+            updated_time
+        FROM
+            charge_rule
+        WHERE
+            parking_iot_id = #{parkingIotId}
+        ORDER BY
+            priority DESC,
+            id ASC
+    </select>
+
+</mapper>

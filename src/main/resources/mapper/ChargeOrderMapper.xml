@@ -52,4 +52,16 @@
         WHERE id = #{id}
     </update>
     
+    <select id="selectByInRecordIdAndOutTime" resultMap="ChargeOrderResultMap">
+        SELECT
+            id,
+            in_record_id,
+            amount,
+            pay_status,
+            out_time,
+            create_time
+        FROM charge_order
+        WHERE in_record_id = #{inRecordId}
+          AND out_time = #{outTime}
+     </select>
 </mapper>

@@ -1,4 +1,4 @@
-package com.charge.controller;
+package com.charge.controller.app;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,17 +15,18 @@ import jakarta.validation.Valid;
 
 
 @RestController
-@RequestMapping("/charge")
-public class ChargeController {
+@RequestMapping("api/app/charge")
+public class AppChargeController {
 
-    public final ChargeService chargeService;
+    private final ChargeService chargeService;
 
-    public ChargeController(ChargeService chargeService) {
+    public AppChargeController(ChargeService chargeService) {
         this.chargeService = chargeService;
     }
 
     /**
      * 出场计费：计算金额 + 写出场时间 + 生成未支付订单
+     * app端调用
      */
     @PostMapping("/calculate") 
     public Result<CalculateFeeResponse> calculateFee(@RequestBody @Valid CalculateFeeRequest request) {
@@ -35,9 +36,11 @@ public class ChargeController {
 
     /**
      * 支付成功确认：更新订单为已支付，并写入入场记录的支付状态
+     * app端调用
      */
     @PostMapping("/confirmPayment")
-    public void confirmPayment(@RequestBody @Valid ConfirmPaymentRequest request) {
+    public Result<Void> confirmPayment(@RequestBody @Valid ConfirmPaymentRequest request) {
         chargeService.confirmPayment(request);
+        return Result.success();
     }
 }
