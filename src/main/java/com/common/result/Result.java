@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+import com.charge.entity.ChargeOrder;
+
 /**
  * 统一响应结果类
  */
@@ -82,5 +84,10 @@ public class Result<T> implements Serializable {
      */
     public static <T> Result<T> build(Integer code, String message, T data) {
         return new Result<>(code, message, data, System.currentTimeMillis());
+    }
+
+    public static Result<PageResult<ChargeOrder>> fail(String string) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'fail'");
     }
 }

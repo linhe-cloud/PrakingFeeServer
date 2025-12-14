@@ -19,5 +19,10 @@ public interface ChargeService {
      * 支付成功确认：更新订单为以支付，并写入入场记录的支付状态
      */
     void confirmPayment(ConfirmPaymentRequest request);
+
+    /**
+     * 费用预览：只计算金额，不生成订单，不更新记录
+     */
+    CalculateFeeResponse previewParkingFee(CalculateFeeRequest request);
     
 } 

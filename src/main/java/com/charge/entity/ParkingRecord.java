@@ -6,7 +6,7 @@ public class ParkingRecord {
 
     private Long id;
     private String plateNumber;
-    private Long parkingLotId;
+    private Long parkingIotId;
     private LocalDateTime inTime;
     private LocalDateTime outTime;
     private Long paidAmount;
@@ -31,10 +31,10 @@ public class ParkingRecord {
     }
 
     public Long getParkingIotId() {
-        return parkingLotId;
+        return parkingIotId;
     }
-    public void setParkingIotId(Long parkingLotId) {
-        this.parkingLotId = parkingLotId;
+    public void setParkingIotId(Long parkingIotId) {
+        this.parkingIotId = parkingIotId;
     }
 
     public LocalDateTime getInTime() {

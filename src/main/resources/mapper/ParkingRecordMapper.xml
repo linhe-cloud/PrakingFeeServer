@@ -8,7 +8,7 @@
     <resultMap id="ParkingRecordResultMap" type="com.charge.entity.ParkingRecord">
         <id property="id" column="id"/>
         <result property="plateNumber" column="plate_number"/>
-        <result property="parkingLotId" column="parking_lot_id"/>
+        <result property="parkingIotId" column="parking_lot_id"/>
         <result property="inTime" column="in_time"/>
         <result property="outTime" column="out_time"/>
         <result property="paidAmount" column="paid_amount"/>
@@ -38,7 +38,7 @@
         UPDATE parking_record
         <set>
             <if test="plateNumber != null">plate_number = #{plateNumber},</if>
-            <if test="parkingLotId != null">parking_lot_id = #{parkingLotId},</if>
+            <if test="parkingIotId != null">parking_lot_id = #{parkingIotId},</if>
             <if test="inTime != null">in_time = #{inTime},</if>
             <if test="outTime != null">out_time = #{outTime},</if>
             <if test="paidAmount != null">paid_amount = #{paidAmount},</if>
@@ -60,7 +60,7 @@
             updated_time
         ) VALUES (
             #{plateNumber},
-            #{parkingLotId},
+            #{parkingIotId},
             #{inTime},
             #{status},
             #{remark},
