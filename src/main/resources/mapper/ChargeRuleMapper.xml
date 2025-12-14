@@ -52,7 +52,7 @@
             effective_start_date, effective_end_date, effective_time_range,
             priority, status
         ) VALUES (
-            #{parkingiotId}, #{ruleName}, #{carType}, #{chargeMode},
+            #{parkingIotId}, #{ruleName}, #{carType}, #{chargeMode},
             #{freeMinutes}, #{unitPrice},
             #{maxAmountPerDay}, #{maxAmountPerSession},
             #{effectiveStartDate}, #{effectiveEndDate}, #{effectiveTimeRange},
@@ -63,11 +63,11 @@
     <update id="updateById" parameterType="com.charge.entity.ChargeRule">
         UPDATE charge_rule
         SET
-            parking_iot_id = #{parkingiotId},
+            parking_iot_id = #{parkingIotId},
             rule_name = #{ruleName},
             car_type = #{carType},
             charge_mode = #{chargeMode},
-            free_minutes = #{freeMinutes},
+            free_minutes = #{FreeMinutes},
             unit_price = #{unitPrice},
             max_amount_per_day = #{maxAmountPerDay},
             max_amount_per_session = #{maxAmountPerSession},

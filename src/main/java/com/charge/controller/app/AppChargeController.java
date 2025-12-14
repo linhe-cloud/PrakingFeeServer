@@ -43,4 +43,16 @@ public class AppChargeController {
         chargeService.confirmPayment(request);
         return Result.success();
     }
+
+    /**
+     * 预览计费：计算金额，但不生成订单
+     * app端调用
+     */
+    @PostMapping("/preview")
+    public Result<CalculateFeeResponse> previewFee(@RequestBody @Valid CalculateFeeRequest request) {
+        // 只计算，不生成订单
+        CalculateFeeResponse response = chargeService.previewParkingFee(request);
+        return Result.success(response);
+    }
+
 }

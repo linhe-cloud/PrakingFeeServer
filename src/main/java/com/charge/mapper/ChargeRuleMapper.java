@@ -2,11 +2,10 @@ package com.charge.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-    
+
 import java.time.LocalDate;
 import java.util.List;
 import com.charge.entity.ChargeRule;
-
 
 @Mapper
 public interface ChargeRuleMapper {
@@ -27,5 +26,5 @@ public interface ChargeRuleMapper {
     /**
      * 查询某车场的所有规则(不限制生效时间/状态),用于管理端查看
      */
-    List<ChargeRule> selectByParkingIotId(@Param("parkingIotId") Long parkingIotId);
+    List<ChargeRule> selectByParkingIot(@Param("parkingIotId") Long parkingIotId);
 }

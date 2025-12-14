@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 计费服务实现类
@@ -44,6 +46,79 @@ public class ChargeServiceImpl implements ChargeService {
         this.parkingIotMapper = parkingIotMapper;
         this.chargeOrderMapper = chargeOrderMapper;
         this.chargeRuleService = chargeRuleService;
+    }
+
+    /**
+     * 生成业务订单号
+     */
+    private String generateOrderNo() {
+        String timePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        int random = ThreadLocalRandom.current().nextInt(0, 1000000);
+        String randomPart = String.format("%06d", random);
+        return "CO" + timePart + randomPart;
+    }
+
+    /**
+     * 预览计费：计算金额，但不生成订单
+     */
+    @Override
+    public CalculateFeeResponse previewParkingFee(CalculateFeeRequest request) {
+        ParkingRecord inRecord = parkingRecordMapper.selectById(request.getInRecordId());
+        if (inRecord == null) {
+            throw new BusinessException("入场记录不存在，id=" + request.getInRecordId());
+        }
+
+        LocalDateTime inTime = inRecord.getInTime();
+        LocalDateTime outTime = request.getExitTime();
+        if (outTime.isBefore(inTime)) {
+            throw new BusinessException("出场时间不能早于入场时间");
+        }
+
+        Long parkingIotId = inRecord.getParkingIotId();
+        if (parkingIotId == null) {
+            throw new BusinessException("停车记录未关联车场,id=" + inRecord.getId());
+        }
+
+        long minutes = Duration.between(inTime, outTime).toMinutes();
+        if (minutes <= 0) {
+            minutes = 1; // 至少1分钟
+        }
+
+        String feeRuleName;
+        long amountInCents;
+
+        ChargeRule rule = chargeRuleService.getApplicableRule(parkingIotId);
+        if (rule != null) {
+            feeRuleName = rule.getRuleName();
+            amountInCents = chargeRuleService.calculateAmount(rule, minutes);
+        } else {
+            feeRuleName = "前30分钟免费,之后按小时计费"; // 默认规则名称
+
+            ParkingIot parkingIot = parkingIotMapper.selectById(inRecord.getParkingIotId());
+            Integer unitPrice = parkingIot.getUnitPrice(); // 假设是 500 表示 5.00 元/小时
+            if (unitPrice == null || unitPrice <= 0) {
+                throw new BusinessException("车场未配置有效单价");
+            } 
+            // 实现“前30分钟免费”的计费规则
+            if (minutes <= 30) {
+                amountInCents = 0; // 免费
+            } else {
+                // 超过30分钟：从第31分钟开始计费，按小时向上取整
+                long chargeableMinutes = minutes - 30;          // 扣除免费30分钟
+                long hours = (chargeableMinutes + 59) / 60;     // 向上取整
+                amountInCents = hours * unitPrice;              // 计算金额（单位：分）
+                // 如果正好30分01秒，也会变成1小时
+            }
+        }
+
+        // 组装响应，仅返回计算结果，不生成订单
+        CalculateFeeResponse resp = new CalculateFeeResponse();
+        resp.setInRecordId(inRecord.getId());
+        resp.setParkingMinutes(minutes);
+        resp.setAmount(amountInCents);
+        resp.setFeeRuleName(feeRuleName);
+        resp.setRealOutTime(outTime);
+        return resp;        
     }
 
     /**
@@ -128,11 +203,15 @@ public class ChargeServiceImpl implements ChargeService {
 
         // 5. 生成收费订单并入库
         ChargeOrder order = new ChargeOrder();
+        order.setOrderNo(generateOrderNo());
         order.setInRecordId(inRecord.getId());
         order.setAmount(amountInCents);
-        order.setPayStatus("UNPAID"); // 0表示未支付，1表示已支付
-        order.setCreateTime(LocalDateTime.now());
+        order.setPayStatus("UNPAID"); // 未支付
+        order.setPayChannel(null);
+        order.setPayTime(null);
         order.setOutTime(outTime);
+        order.setFeeRuleName(feeRuleName);
+        order.setCreateTime(LocalDateTime.now());
         chargeOrderMapper.insert(order);
 
         // 6. 更新入场记录的出场时间
@@ -142,6 +221,7 @@ public class ChargeServiceImpl implements ChargeService {
         // 7. 组装响应对象返回给 Controller
         CalculateFeeResponse resp = new CalculateFeeResponse();
         resp.setInRecordId(inRecord.getId());
+        resp.setOrderId(order.getId());
         resp.setParkingMinutes(minutes);
         resp.setAmount(amountInCents);
         resp.setFeeRuleName(feeRuleName);
@@ -165,8 +245,10 @@ public class ChargeServiceImpl implements ChargeService {
             throw new BusinessException("订单状态不允许重复支付");
         }
 
-        // 2. 更新订单为已支付
+        // 2. 更新订单为已支付（暂时写死渠道为 CASH）
         order.setPayStatus("PAID");
+        order.setPayChannel("CASH");
+        order.setPayTime(LocalDateTime.now());
         chargeOrderMapper.updateById(order);
 
         // 3. 更新入场记录的支付状态

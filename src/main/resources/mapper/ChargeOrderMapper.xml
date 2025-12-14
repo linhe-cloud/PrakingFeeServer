@@ -6,25 +6,38 @@
 
     <resultMap id="ChargeOrderResultMap" type="com.charge.entity.ChargeOrder">
         <id property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
         <result property="inRecordId" column="in_record_id"/>
         <result property="amount" column="amount"/>
         <result property="payStatus" column="pay_status"/>
+        <result property="payChannel" column="pay_channel"/>
+        <result property="payTime" column="pay_time"/>
         <result property="outTime" column="out_time"/>
-        <result property="createTime" column="create_time"/>        
+        <result property="feeRuleName" column="fee_rule_name"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>        
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO charge_order (
+            order_no,
             in_record_id,
             amount,
             pay_status,
+            pay_channel,
+            pay_time,
             out_time,
+            fee_rule_name,
             create_time
         ) VALUES (
+            #{orderNo},
             #{inRecordId},
             #{amount},
             #{payStatus},
+            #{payChannel},
+            #{payTime},
             #{outTime},
+            #{feeRuleName},
             NOW()
         )
     </insert>
@@ -32,11 +45,16 @@
     <select id="selectById" resultMap="ChargeOrderResultMap">
         SELECT
             id,
+            order_no,
             in_record_id,
             amount,
             pay_status,
+            pay_channel,
+            pay_time,
             out_time,
-            create_time
+            fee_rule_name,
+            create_time,
+            update_time
         FROM charge_order
         WHERE id = #{id}
     </select>
@@ -44,24 +62,65 @@
     <update id="updateById">
         UPDATE charge_order
         SET
-            in_record_id = #{inRecordId},
-            amount = #{amount},
             pay_status = #{payStatus},
-            out_time = #{outTime},
-            create_time = #{createTime}
+            pay_channel = #{payChannel},
+            pay_time = #{payTime}
         WHERE id = #{id}
     </update>
     
     <select id="selectByInRecordIdAndOutTime" resultMap="ChargeOrderResultMap">
         SELECT
             id,
+            order_no,
             in_record_id,
             amount,
             pay_status,
+            pay_channel,
+            pay_time,
             out_time,
-            create_time
+            fee_rule_name,
+            create_time,
+            update_time
         FROM charge_order
         WHERE in_record_id = #{inRecordId}
           AND out_time = #{outTime}
      </select>
+
+     <select id= "selectPage" resultMap="ChargeOrderResultMap">
+        SELECT
+            id,
+            order_no,
+            in_record_id,
+            amount,
+            pay_status,
+            pay_channel,
+            pay_time,
+            out_time,
+            fee_rule_name,
+            create_time,
+            update_time
+        FROM
+            charge_order
+        <where>
+            <if test="payStatus != null and payStatus != ''">
+                AND pay_status = #{payStatus}
+            </if>
+        </where>
+        ORDER BY
+            create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByCondition" resultType="long">
+        SELECT
+            COUNT(1)
+        FROM
+            charge_order
+        <where>
+            <if test="payStatus != null and payStatus != ''">
+                AND pay_status = #{payStatus}
+            </if>
+        </where>
+    </select>
+    
 </mapper>

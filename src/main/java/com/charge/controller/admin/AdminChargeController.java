@@ -5,8 +5,12 @@ import com.charge.entity.ParkingRecord;
 import com.charge.mapper.ChargeOrderMapper;
 import com.charge.mapper.ParkingRecordMapper;
 import com.common.exception.BusinessException;
+import com.common.result.PageResult;
 import com.common.result.Result;
+
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/charge") 
@@ -20,6 +24,34 @@ public class AdminChargeController {
         this.chargeOrderMapper = chargeOrderMapper;
         this.parkingRecordMapper = parkingRecordMapper;
     }
+
+    /**
+     * 分页查询订单列表（管理端查看）
+     */
+    @GetMapping("/orders")
+    public Result<PageResult<ChargeOrder>> listOrders(
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size,
+            @RequestParam(value = "payStatus", required = false) String payStatus) {
+                
+        if (page == null || page < 1) {
+            page = 1;
+        }
+        if (size == null || size < 1) {
+            size = 10;
+        } 
+
+        long current = page.longValue();
+        long pageSize = size.longValue();
+        long offset = (current - 1) * pageSize;
+
+        Long total = chargeOrderMapper.countByCondition(payStatus);
+        List<ChargeOrder> rows = chargeOrderMapper.selectPage(payStatus, offset, pageSize);
+
+        PageResult<ChargeOrder> pageResult = PageResult.build(rows, total, current, pageSize);
+        return Result.success(pageResult);
+    }
+    
 
     /**
      * 查询订单详情（管理端查看）

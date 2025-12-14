@@ -4,6 +4,7 @@ import com.charge.entity.ChargeRule;
 import com.charge.entity.DTO.ChargeRuleRequest;
 import com.charge.entity.VO.ChargeRuleReponse;
 import com.charge.service.ChargeRuleService;
+import com.common.result.Result;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
  * 管理端-计费规则管理接口
  */
 @RestController
-@RequestMapping("/admin/chargeRule")
+@RequestMapping("/api/admin/chargeRule")
 public class ChargeRuleAdminController {
 
     @Resource
@@ -26,7 +27,7 @@ public class ChargeRuleAdminController {
      * 新增或编辑计费规则
      */
     @PostMapping("/save")
-    public void save(@RequestBody ChargeRuleRequest dto) {
+    public Result<Void> save(@RequestBody ChargeRuleRequest dto) {
         ChargeRule rule = new ChargeRule();
         rule.setId(dto.getId());
         rule.setParkingIotId(dto.getParkingIotId());
@@ -44,24 +45,29 @@ public class ChargeRuleAdminController {
         rule.setStatus(dto.getStatus());
 
         chargeRuleService.saveRule(rule);
+        return Result.success();
     }
 
     /**
      * 按车场查询规则列表
      */
     @GetMapping("/list")
-    public List<ChargeRuleReponse> list(@RequestParam("parkingIotId") Long parkingIotId) {
+    public Result<List<ChargeRuleReponse>> list(@RequestParam("parkingIotId") Long parkingIotId) {
         List<ChargeRule> rules = chargeRuleService.listRulesByParkingIot(parkingIotId);
-        return rules.stream().map(this::toVO).collect(Collectors.toList());
+        List<ChargeRuleReponse> voList = rules.stream()
+                .map(this::toVO)
+                .collect(Collectors.toList());
+        return Result.success(voList);
     }
 
     /**
      * 修改规则状态: 启用/禁用
      */
     @PostMapping("/changeStatus")
-    public void changeStatus(@RequestParam("ruleId") Long ruleId,
-                             @RequestParam("status") Integer status) {
+    public Result<Void> changeStatus(@RequestParam("ruleId") Long ruleId,
+                                     @RequestParam("status") Integer status) {
         chargeRuleService.updateChargeRuleStatus(ruleId, status);
+        return Result.success();
     }
 
     private ChargeRuleReponse toVO(ChargeRule rule) {
