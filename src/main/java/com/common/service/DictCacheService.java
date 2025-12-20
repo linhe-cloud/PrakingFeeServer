@@ -131,12 +131,22 @@ public class DictCacheService {
      */
     public void removeDictType(String typeCode) {
         try {
+            // 删除字典类型key
             String typeKey = DICT_TYPE_PREFIX + typeCode;
             redisService.del(typeKey);
 
             // 删除该类型下的所有字典项
+            // 使用Lua脚本批量删除匹配的key
             String pattern = DICT_PREFIX + typeCode + ":*";
-            // 注意：这里需要使用scan命令来删除匹配的key，暂时用简单的删除
+            String luaScript = 
+                "local keys = redis.call('keys', ARGV[1]) " +
+                "if #keys > 0 then " +
+                "    return redis.call('del', unpack(keys)) " +
+                "else " +
+                "    return 0 " +
+                "end";
+            
+            redisService.executeLuaScript(luaScript, Long.class, java.util.Collections.emptyList(), pattern);
             log.debug("删除字典类型缓存成功: typeCode={}", typeCode);
         } catch (Exception e) {
             log.error("删除字典类型缓存失败: typeCode={}", typeCode, e);
@@ -164,9 +174,20 @@ public class DictCacheService {
      */
     public void clearAllDictCache() {
         try {
+            // 删除所有字典缓存的key
             redisService.del(DICT_ALL_PREFIX);
-            // 注意：这里应该删除所有以dict:开头的key
-            // 在实际项目中，可以使用Redis的scan命令或者维护一个字典类型列表
+            
+            // 使用Lua脚本删除所有以dict:开头的key
+            String pattern = DICT_PREFIX + "*";
+            String luaScript = 
+                "local keys = redis.call('keys', ARGV[1]) " +
+                "if #keys > 0 then " +
+                "    return redis.call('del', unpack(keys)) " +
+                "else " +
+                "    return 0 " +
+                "end";
+            
+            redisService.executeLuaScript(luaScript, Long.class, java.util.Collections.emptyList(), pattern);
             log.debug("清除所有字典缓存成功");
         } catch (Exception e) {
             log.error("清除所有字典缓存失败", e);

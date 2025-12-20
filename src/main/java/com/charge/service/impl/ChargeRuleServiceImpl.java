@@ -3,6 +3,7 @@ package com.charge.service.impl;
 import com.charge.entity.ChargeRule;
 import com.charge.mapper.ChargeRuleMapper;
 import com.charge.service.ChargeRuleService;
+import com.charge.service.ChargeCacheService;
 import com.common.exception.BusinessException;
 
 import java.time.LocalDate;
@@ -10,20 +11,45 @@ import java.util.List;
 import jakarta.annotation.Resource;
 
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class ChargeRuleServiceImpl implements ChargeRuleService {
 
     @Resource
     private ChargeRuleMapper chargeRuleMapper;
+    
+    @Resource
+    private ChargeCacheService chargeCacheService;
 
     @Override
     public ChargeRule getApplicableRule(Long parkingIotId) {
-        List<ChargeRule> rules = chargeRuleMapper.selectValidRulesByParkingIot(parkingIotId, LocalDate.now());
-        if (rules == null || rules.isEmpty()) {
-            return null;
+        // 1. 先从缓存获取
+        ChargeRule cachedRule = chargeCacheService.getChargeRule(parkingIotId);
+        if (cachedRule != null) {
+            // 空对象标记表示数据库中无此规则
+            if (cachedRule.getId() == null) {
+                log.debug("缓存命中（无规则）: parkingIotId={}", parkingIotId);
+                return null;
+            }
+            log.debug("缓存命中: parkingIotId={}, ruleId={}", parkingIotId, cachedRule.getId());
+            return cachedRule;
         }
-        return rules.get(0);
+        
+        // 2. 缓存未命中，查询数据库
+        log.debug("缓存未命中，查询数据库: parkingIotId={}", parkingIotId);
+        List<ChargeRule> rules = chargeRuleMapper.selectValidRulesByParkingIot(parkingIotId, LocalDate.now());
+        
+        ChargeRule rule = null;
+        if (rules != null && !rules.isEmpty()) {
+            rule = rules.get(0);
+        }
+        
+        // 3. 写入缓存（包括null值，防止缓存穿透）
+        chargeCacheService.cacheChargeRule(parkingIotId, rule);
+        
+        return rule;
     }
 
     @Override
@@ -64,11 +90,17 @@ public class ChargeRuleServiceImpl implements ChargeRuleService {
         } else {
             chargeRuleMapper.updateById(rule);
         }
+        
+        // 删除缓存，下次查询时重新加载
+        if (rule.getParkingIotId() != null) {
+            chargeCacheService.evictChargeRule(rule.getParkingIotId());
+            log.info("规则修改，删除缓存: parkingIotId={}", rule.getParkingIotId());
+        }
     }
 
     @Override
     public List<ChargeRule> listRulesByParkingIot(Long parkingIotId) {
-        return chargeRuleMapper.selectValidRulesByParkingIot(parkingIotId, LocalDate.now());
+        return chargeRuleMapper.selectByParkingIot(parkingIotId);
     }
 
     @Override
@@ -79,5 +111,12 @@ public class ChargeRuleServiceImpl implements ChargeRuleService {
         }
         rule.setStatus(status);
         chargeRuleMapper.updateById(rule);
+        
+        // 删除缓存，下次查询时重新加载
+        if (rule.getParkingIotId() != null) {
+            chargeCacheService.evictChargeRule(rule.getParkingIotId());
+            log.info("规则状态修改，删除缓存: parkingIotId={}, status={}", 
+                rule.getParkingIotId(), status);
+        }
     }
 }

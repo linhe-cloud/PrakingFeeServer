@@ -1,4 +1,4 @@
-package com.charge.entity;
+package com.parking.entity;
 
 import java.time.LocalDateTime;
 
@@ -6,6 +6,8 @@ public class ParkingRecord {
 
     private Long id;
     private String plateNumber;
+    private String vehicleType;
+    private String usageNature;
     private Long parkingIotId;
     private LocalDateTime inTime;
     private LocalDateTime outTime;
@@ -30,6 +32,20 @@ public class ParkingRecord {
         this.plateNumber = plateNumber;
     }
 
+    public String getVehicleType() {
+        return vehicleType;
+    }
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
+    public String getUsageNature() {
+        return usageNature;
+    }
+    public void setUsageNature(String usageNature) {
+        this.usageNature = usageNature;
+    }
+    
     public Long getParkingIotId() {
         return parkingIotId;
     }

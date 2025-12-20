@@ -768,8 +768,13 @@ public class RedisService {
             }
             // 使用局部变量确保类型安全
             String nonNullKey = key;
-            // 使用展开运算符确保类型安全
-            redisTemplate.opsForList().rightPushAll(nonNullKey, value.toArray());
+            // 过滤null元素并转换为数组
+            Object[] nonNullArray = value.stream()
+                    .filter(Objects::nonNull)
+                    .toArray();
+            if (nonNullArray.length > 0) {
+                redisTemplate.opsForList().rightPushAll(nonNullKey, nonNullArray);
+            }
             return true;
         } catch (Exception e) {
             log.error("设置List缓存失败: key={}, value={}", key, value, e);
@@ -793,8 +798,13 @@ public class RedisService {
             }
             // 使用局部变量确保类型安全
             String nonNullKey = key;
-            // 使用展开运算符确保类型安全
-            redisTemplate.opsForList().rightPushAll(nonNullKey, value.toArray());
+            // 过滤null元素并转换为数组
+            Object[] nonNullArray = value.stream()
+                    .filter(Objects::nonNull)
+                    .toArray();
+            if (nonNullArray.length > 0) {
+                redisTemplate.opsForList().rightPushAll(nonNullKey, nonNullArray);
+            }
             if (time > 0) {
                 expire(nonNullKey, time);
             }
@@ -865,12 +875,27 @@ public class RedisService {
      * @param args   参数列表
      * @return 脚本执行结果
      */
+    @SuppressWarnings("unchecked")
     public <T> T executeLuaScript(String script, List<String> keys, Object... args) {
         try {
+            if (script == null || keys == null) {
+                log.warn("执行Lua脚本参数为null");
+                return null;
+            }
             DefaultRedisScript<T> redisScript = new DefaultRedisScript<>();
             redisScript.setScriptText(script);
             redisScript.setResultType((Class<T>) Object.class);
-            return redisTemplate.execute(redisScript, keys, args);
+            // 过滤null元素，创建中间变量确保类型安全
+            List<String> filteredKeys = keys.stream()
+                    .filter(Objects::nonNull)
+                    .toList();
+            Object[] filteredArgs = args != null ? Arrays.stream(args)
+                    .filter(Objects::nonNull)
+                    .toArray() : new Object[0];
+            // 使用中间变量避免 @NonNull 类型安全警告
+            List<String> nonNullKeys = filteredKeys;
+            Object[] nonNullArgs = filteredArgs;
+            return redisTemplate.execute(redisScript, nonNullKeys, nonNullArgs);
         } catch (Exception e) {
             log.error("执行Lua脚本失败: script={}, keys={}, args={}", script, keys, Arrays.toString(args), e);
             return null;
@@ -888,10 +913,24 @@ public class RedisService {
      */
     public <T> T executeLuaScript(String script, Class<T> resultType, List<String> keys, Object... args) {
         try {
+            if (script == null || resultType == null || keys == null) {
+                log.warn("执行Lua脚本参数为null");
+                return null;
+            }
             DefaultRedisScript<T> redisScript = new DefaultRedisScript<>();
             redisScript.setScriptText(script);
             redisScript.setResultType(resultType);
-            return redisTemplate.execute(redisScript, keys, args);
+            // 过滤null元素，创建中间变量确保类型安全
+            List<String> filteredKeys = keys.stream()
+                    .filter(Objects::nonNull)
+                    .toList();
+            Object[] filteredArgs = args != null ? Arrays.stream(args)
+                    .filter(Objects::nonNull)
+                    .toArray() : new Object[0];
+            // 使用中间变量避免 @NonNull 类型安全警告
+            List<String> nonNullKeys = filteredKeys;
+            Object[] nonNullArgs = filteredArgs;
+            return redisTemplate.execute(redisScript, nonNullKeys, nonNullArgs);
         } catch (Exception e) {
             log.error("执行Lua脚本失败: script={}, keys={}, args={}", script, keys, Arrays.toString(args), e);
             return null;

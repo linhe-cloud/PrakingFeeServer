@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.charge.mapper.OrderModificationRecordMapper">
+
+    <resultMap id="OrderModificationRecordResultMap" type="com.charge.entity.OrderModificationRecord">
+        <id property="id" column="id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="modifyType" column="modify_type"/>
+        <result property="beforeAmount" column="before_amount"/>
+        <result property="afterAmount" column="after_amount"/>
+        <result property="reason" column="reason"/>
+        <result property="applyUserId" column="apply_user_id"/>
+        <result property="applyUserName" column="apply_user_name"/>
+        <result property="approveUserId" column="approve_user_id"/>
+        <result property="approveUserName" column="approve_user_name"/>
+        <result property="status" column="status"/>
+        <result property="approveTime" column="approve_time"/>
+        <result property="approveRemark" column="approve_remark"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="updatedTime" column="updated_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.charge.entity.OrderModificationRecord"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO order_modification_record (
+            order_id,
+            order_no,
+            modify_type,
+            before_amount,
+            after_amount,
+            reason,
+            apply_user_id,
+            apply_user_name,
+            status
+        ) VALUES (
+            #{orderId},
+            #{orderNo},
+            #{modifyType},
+            #{beforeAmount},
+            #{afterAmount},
+            #{reason},
+            #{applyUserId},
+            #{applyUserName},
+            #{status}
+        )
+    </insert>
+
+    <update id="updateStatus" parameterType="com.charge.entity.OrderModificationRecord">
+        UPDATE order_modification_record
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="approveUserId != null">approve_user_id = #{approveUserId},</if>
+            <if test="approveUserName != null">approve_user_name = #{approveUserName},</if>
+            <if test="approveTime != null">approve_time = #{approveTime},</if>
+            <if test="approveRemark != null">approve_remark = #{approveRemark},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectById" resultMap="OrderModificationRecordResultMap">
+        SELECT
+            id, order_id, order_no, modify_type, before_amount, after_amount,
+            reason, apply_user_id, apply_user_name, approve_user_id, approve_user_name,
+            status, approve_time, approve_remark, created_time, updated_time
+        FROM order_modification_record
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByOrderId" resultMap="OrderModificationRecordResultMap">
+        SELECT
+            id, order_id, order_no, modify_type, before_amount, after_amount,
+            reason, apply_user_id, apply_user_name, approve_user_id, approve_user_name,
+            status, approve_time, approve_remark, created_time, updated_time
+        FROM order_modification_record
+        WHERE order_id = #{orderId}
+        ORDER BY created_time DESC
+    </select>
+
+    <select id="selectPendingList" resultMap="OrderModificationRecordResultMap">
+        SELECT
+            id, order_id, order_no, modify_type, before_amount, after_amount,
+            reason, apply_user_id, apply_user_name, approve_user_id, approve_user_name,
+            status, approve_time, approve_remark, created_time, updated_time
+        FROM order_modification_record
+        WHERE status = 'PENDING'
+        ORDER BY created_time ASC
+    </select>
+
+</mapper>

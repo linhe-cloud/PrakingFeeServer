@@ -1,4 +1,4 @@
-CREATE TABLE charge_rule (
+CREATE TABLE IF NOT EXISTS charge_rule (
     id                      BIGINT          NOT NULL AUTO_INCREMENT,
     parking_iot_id          BIGINT          NOT NULL COMMENT '适用车场ID',
     rule_name               VARCHAR(100)    NOT NULL COMMENT '规则名称',

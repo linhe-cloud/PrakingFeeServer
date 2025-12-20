@@ -1,8 +1,8 @@
-package com.charge.mapper;
+package com.parking.mapper;
 
 import io.lettuce.core.dynamic.annotation.Param;
 import org.apache.ibatis.annotations.Mapper;
-import com.charge.entity.ParkingIot;
+import com.parking.entity.ParkingIot;
 
 
 @Mapper

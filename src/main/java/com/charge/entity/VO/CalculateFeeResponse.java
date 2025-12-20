@@ -38,6 +38,22 @@ public class CalculateFeeResponse {
      */
     private LocalDateTime realOutTime;
 
+    /**
+     * 原价金额（未优惠，单位：分）
+     */
+    private long originalAmount;
+
+    /**
+     * 总优惠金额（单位：分）
+     */
+    private long discountAmount;
+
+    /**
+     * 应付金额（优惠后，单位：分）
+     * 为兼容老字段，等于 amount
+     */
+    private long payableAmount;
+
     public Long getInRecordId() {
         return inRecordId;
     }
@@ -84,5 +100,25 @@ public class CalculateFeeResponse {
     public void setRealOutTime(LocalDateTime realOutTime) {
         this.realOutTime = realOutTime;
     }
-}
 
+    public long getOriginalAmount() {
+        return originalAmount;
+    }
+    public void setOriginalAmount(long originalAmount) {
+        this.originalAmount = originalAmount;
+    }
+
+    public long getDiscountAmount() {
+        return discountAmount;
+    }
+    public void setDiscountAmount(long discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public long getPayableAmount() {
+        return payableAmount;
+    }
+    public void setPayableAmount(long payableAmount) {
+        this.payableAmount = payableAmount;
+    }
+}

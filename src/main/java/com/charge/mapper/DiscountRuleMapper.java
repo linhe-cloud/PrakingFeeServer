@@ -3,6 +3,7 @@ package com.charge.mapper;
 import com.charge.entity.DiscountRule;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface DiscountRuleMapper {
@@ -20,4 +21,10 @@ public interface DiscountRuleMapper {
      * status 为 null 时查询全部
      */
     List<DiscountRule> selectList(@Param("status") Integer status);
+
+    /**
+     * 按规则编码查询当前有效的优惠规则
+     */
+    DiscountRule selectEffectiveByCode(@Param("ruleCode") String ruleCode,
+                                       @Param("now") LocalDateTime now);
 }

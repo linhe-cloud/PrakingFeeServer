@@ -48,15 +48,17 @@
 
     <update id="updateById">
         UPDATE discount_rule
-        SET
-            rule_name      = #{ruleName},
-            description    = #{description},
-            discount_type  = #{discountType},
-            discount_value = #{discountValue},
-            max_discount   = #{maxDiscount},
-            status         = #{status},
-            effective_start = #{effectiveStart},
-            effective_end   = #{effectiveEnd}
+        <set>
+            <if test="ruleName != null">rule_name = #{ruleName},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="discountType != null">discount_type = #{discountType},</if>
+            <if test="discountValue != null">discount_value = #{discountValue},</if>
+            <if test="maxDiscount != null">max_discount = #{maxDiscount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="effectiveStart != null">effective_start = #{effectiveStart},</if>
+            <if test="effectiveEnd != null">effective_end = #{effectiveEnd},</if>
+            update_time = NOW()
+        </set>
         WHERE id = #{id}
     </update>
 
@@ -104,6 +106,28 @@
             </if>
         </where>
         ORDER BY create_time DESC
+    </select>
+
+    <select id="selectEffectiveByCode" resultMap="DiscountRuleResultMap">
+        SELECT
+            id,
+            rule_code,
+            rule_name,
+            description,
+            discount_type,
+            discount_value,
+            max_discount,
+            status,
+            effective_start,
+            effective_end,
+            create_time,
+            update_time
+        FROM discount_rule
+        WHERE rule_code = #{ruleCode}
+          AND status = 1
+          AND (effective_start IS NULL OR effective_start &lt;= #{now})
+          AND (effective_end   IS NULL OR effective_end   &gt;= #{now})
+        LIMIT 1
     </select>
 
 </mapper>

@@ -19,8 +19,8 @@
         <result property="effectiveTimeRange" column="effective_time_range"/>
         <result property="priority" column="priority"/>
         <result property="status" column="status"/>
-        <result property="createdTime" column="created_time"/>
-        <result property="updatedTime" column="updated_time"/>
+        <result property="createdTime" column="create_time"/>
+        <result property="updatedTime" column="update_time"/>
     </resultMap>
 
     <select id="selectValidRulesByParkingIot" resultMap="ChargeRuleResultMap">
@@ -28,7 +28,7 @@
             id, parking_iot_id, rule_name, car_type, charge_mode,
             free_minutes, unit_price, max_amount_per_day, max_amount_per_session,
             effective_start_date, effective_end_date, effective_time_range,
-            priority, status, created_time, updated_time
+            priority, status, create_time, update_time
         FROM
             charge_rule
         WHERE
@@ -67,7 +67,7 @@
             rule_name = #{ruleName},
             car_type = #{carType},
             charge_mode = #{chargeMode},
-            free_minutes = #{FreeMinutes},
+            free_minutes = #{freeMinutes},
             unit_price = #{unitPrice},
             max_amount_per_day = #{maxAmountPerDay},
             max_amount_per_session = #{maxAmountPerSession},
@@ -96,8 +96,8 @@
             effective_time_range,
             priority,
             status,
-            created_time,
-            updated_time
+            create_time,
+            update_time
         FROM
             charge_rule
         WHERE

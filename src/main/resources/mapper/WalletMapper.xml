@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.charge.mapper.WalletMapper">
+
+    <resultMap id="WalletResultMap" type="com.charge.entity.Wallet">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="balance" column="balance"/>
+        <result property="totalRecharge" column="total_recharge"/>
+        <result property="totalConsume" column="total_consume"/>
+        <result property="status" column="status"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="updatedTime" column="updated_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.charge.entity.Wallet" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO wallet (
+            user_id,
+            balance,
+            total_recharge,
+            total_consume,
+            status
+        ) VALUES (
+            #{userId},
+            #{balance},
+            #{totalRecharge},
+            #{totalConsume},
+            #{status}
+        )
+    </insert>
+
+    <select id="selectByUserId" resultMap="WalletResultMap">
+        SELECT
+            id,
+            user_id,
+            balance,
+            total_recharge,
+            total_consume,
+            status,
+            created_time,
+            updated_time
+        FROM wallet
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectById" resultMap="WalletResultMap">
+        SELECT
+            id,
+            user_id,
+            balance,
+            total_recharge,
+            total_consume,
+            status,
+            created_time,
+            updated_time
+        FROM wallet
+        WHERE id = #{id}
+    </select>
+
+    <update id="addBalance">
+        UPDATE wallet
+        SET balance = balance + #{amount},
+            total_recharge = total_recharge + #{amount}
+        WHERE user_id = #{userId}
+    </update>
+
+    <update id="deductBalance">
+        UPDATE wallet
+        SET balance = balance - #{amount},
+            total_consume = total_consume + #{amount}
+        WHERE user_id = #{userId}
+          AND balance >= #{amount}
+    </update>
+
+</mapper>
