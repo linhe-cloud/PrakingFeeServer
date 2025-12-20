@@ -32,4 +32,9 @@ public interface ChargeOrderMapper {
      * 统计订单总数（按支付状态筛选）
      */
     Long countByCondition(@Param("payStatus") String payStatus);
+
+    /**
+     * 根据入场记录ID查询订单（小程序端：从停车记录关联订单）
+     */
+    ChargeOrder selectByInRecordId(@Param("inRecordId") Long inRecordId);
 }

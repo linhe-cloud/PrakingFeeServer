@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.charge.mapper.OrderDiscountMapper">
+
+    <resultMap id="OrderDiscountResultMap" type="com.charge.entity.OrderDiscount">
+        <id property="id" column="id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="sourceType" column="source_type"/>
+        <result property="ruleCode" column="rule_code"/>
+        <result property="ruleName" column="rule_name"/>
+        <result property="discountType" column="discount_type"/>
+        <result property="discountValue" column="discount_value"/>
+        <result property="discountAmount" column="discount_amount"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO order_discount (
+            order_id,
+            source_type,
+            rule_code,
+            rule_name,
+            discount_type,
+            discount_value,
+            discount_amount
+        ) VALUES (
+            #{orderId},
+            #{sourceType},
+            #{ruleCode},
+            #{ruleName},
+            #{discountType},
+            #{discountValue},
+            #{discountAmount}
+        )
+    </insert>
+
+    <select id="selectByOrderId" resultMap="OrderDiscountResultMap">
+        SELECT
+            id,
+            order_id,
+            source_type,
+            rule_code,
+            rule_name,
+            discount_type,
+            discount_value,
+            discount_amount,
+            create_time
+        FROM order_discount
+        WHERE order_id = #{orderId}
+        ORDER BY create_time ASC, id ASC
+    </select>
+
+</mapper>

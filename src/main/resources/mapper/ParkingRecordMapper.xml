@@ -3,9 +3,9 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.charge.mapper.ParkingRecordMapper">
+<mapper namespace="com.parking.mapper.ParkingRecordMapper">
 
-    <resultMap id="ParkingRecordResultMap" type="com.charge.entity.ParkingRecord">
+    <resultMap id="ParkingRecordResultMap" type="com.parking.entity.ParkingRecord">
         <id property="id" column="id"/>
         <result property="plateNumber" column="plate_number"/>
         <result property="parkingIotId" column="parking_lot_id"/>
@@ -68,5 +68,56 @@
             NOW()
         )
     </insert>
+
+    <select id="selectCurrentByParkingIotId" resultMap="ParkingRecordResultMap">
+        SELECT
+            id,
+            plate_number,
+            parking_lot_id,
+            in_time,
+            out_time,
+            paid_amount,
+            status,
+            remark,
+            created_time,
+            updated_time
+        FROM parking_record
+        WHERE parking_lot_id = #{parkingIotId}
+            AND status = 'IN'
+    </select>
+
+    <select id="selectByPlateNumber" resultMap="ParkingRecordResultMap">
+        SELECT
+            id,
+            plate_number,
+            parking_lot_id,
+            in_time,
+            out_time,
+            paid_amount,
+            status,
+            remark,
+            created_time,
+            updated_time
+        FROM parking_record
+        WHERE plate_number = #{plateNumber}
+        ORDER BY in_time DESC
+    </select>
+
+    <select id="selectCurrentByPlateNumber" resultMap="ParkingRecordResultMap">
+        SELECT
+            id,
+            plate_number,
+            parking_lot_id,
+            in_time,
+            out_time,
+            paid_amount,
+            status,
+            remark,
+            created_time,
+            updated_time
+        FROM parking_record
+        WHERE plate_number = #{plateNumber}
+            AND status = 'IN'
+    </select>
 
 </mapper>

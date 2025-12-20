@@ -1,9 +1,9 @@
 package com.charge.controller.admin;
 
 import com.charge.entity.ChargeOrder;
-import com.charge.entity.ParkingRecord;
+import com.parking.entity.ParkingRecord;
 import com.charge.mapper.ChargeOrderMapper;
-import com.charge.mapper.ParkingRecordMapper;
+import com.parking.mapper.ParkingRecordMapper;
 import com.common.exception.BusinessException;
 import com.common.result.PageResult;
 import com.common.result.Result;

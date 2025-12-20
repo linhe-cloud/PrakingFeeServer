@@ -1,4 +1,4 @@
-package com.charge.entity;
+package com.parking.entity;
 
 import java.time.LocalDateTime;
 

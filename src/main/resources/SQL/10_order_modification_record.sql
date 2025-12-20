@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS order_modification_record (
+    id                BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    order_id          BIGINT       NOT NULL COMMENT '关联订单ID，charge_order.id',
+    order_no          VARCHAR(64)  NOT NULL COMMENT '业务订单号，冗余',
+    modify_type       VARCHAR(20)  NOT NULL COMMENT '修改类型：AMOUNT_ADJUST/REFUND/CANCEL等',
+    before_amount     BIGINT       NULL COMMENT '修改前金额(分)',
+    after_amount      BIGINT       NULL COMMENT '修改后金额(分)',
+    reason            VARCHAR(500) NOT NULL COMMENT '修改原因',
+    apply_user_id     BIGINT       NOT NULL COMMENT '申请人ID',
+    apply_user_name   VARCHAR(50)  NULL COMMENT '申请人姓名（冗余）',
+    approve_user_id   BIGINT       NULL COMMENT '审批人ID',
+    approve_user_name VARCHAR(50)  NULL COMMENT '审批人姓名（冗余）',
+    status            VARCHAR(20)  NOT NULL DEFAULT 'PENDING' COMMENT '状态：PENDING-待审批，APPROVED-已通过，REJECTED-已拒绝',
+    approve_time      DATETIME     NULL COMMENT '审批时间',
+    approve_remark    VARCHAR(500) NULL COMMENT '审批备注',
+    created_time      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id),
+    KEY idx_order_id (order_id),
+    KEY idx_status (status),
+    KEY idx_apply_user (apply_user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单修改记录表';

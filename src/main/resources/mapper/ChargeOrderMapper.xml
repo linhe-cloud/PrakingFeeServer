@@ -122,5 +122,24 @@
             </if>
         </where>
     </select>
+
+    <select id="selectByInRecordId" resultMap="ChargeOrderResultMap">
+        SELECT
+            id,
+            order_no,
+            in_record_id,
+            amount,
+            pay_status,
+            pay_channel,
+            pay_time,
+            out_time,
+            fee_rule_name,
+            create_time,
+            update_time
+        FROM charge_order
+        WHERE in_record_id = #{inRecordId}
+        ORDER BY create_time DESC
+        LIMIT 1
+    </select>
     
 </mapper>

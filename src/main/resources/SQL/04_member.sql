@@ -1,3 +1,4 @@
+-- 会员信息表
 CREATE TABLE IF NOT EXISTS member (
     id              BIGINT          NOT NULL AUTO_INCREMENT COMMENT '会员ID',
     user_id         BIGINT          NOT NULL COMMENT '用户ID或账号ID',

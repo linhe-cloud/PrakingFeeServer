@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.charge.mapper.MemberMapper">
+
+    <resultMap id="MemberResultMap" type="com.charge.entity.Member">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="level" column="level"/>
+        <result property="discountRate" column="discount_rate"/>
+        <result property="freeParking" column="free_parking"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="updatedTime" column="updated_time"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="MemberResultMap">
+        SELECT
+            id,
+            user_id,
+            level,
+            discount_rate,
+            free_parking,
+            status,
+            remark,
+            created_time,
+            updated_time
+        FROM member
+        WHERE user_id = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="com.charge.entity.Member" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO member (
+            user_id,
+            level,
+            discount_rate,
+            free_parking,
+            status,
+            remark
+        ) VALUES (
+            #{userId},
+            #{level},
+            #{discountRate},
+            #{freeParking},
+            #{status},
+            #{remark}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.charge.entity.Member">
+        UPDATE member
+        <set>
+            <if test="level != null">level = #{level},</if>
+            <if test="discountRate != null">discount_rate = #{discountRate},</if>
+            <if test="freeParking != null">free_parking = #{freeParking},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM member WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" resultMap="MemberResultMap">
+        SELECT
+            id,
+            user_id,
+            level,
+            discount_rate,
+            free_parking,
+            status,
+            remark,
+            created_time,
+            updated_time
+        FROM member
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectList" resultMap="MemberResultMap">
+        SELECT
+            id,
+            user_id,
+            level,
+            discount_rate,
+            free_parking,
+            status,
+            remark,
+            created_time,
+            updated_time
+        FROM member
+        <where>
+            <if test="status != null">
+                status = #{status}
+            </if>
+        </where>
+        ORDER BY created_time DESC
+    </select>
+
+</mapper>

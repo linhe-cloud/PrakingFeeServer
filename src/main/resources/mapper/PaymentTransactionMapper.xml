@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.charge.mapper.PaymentTransactionMapper">
+
+    <resultMap id="PaymentTransactionResultMap" type="com.charge.entity.PaymentTransaction">
+        <id property="id" column="id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="payChannel" column="pay_channel"/>
+        <result property="amount" column="amount"/>
+        <result property="thirdTradeNo" column="third_trade_no"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="updatedTime" column="updated_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.charge.entity.PaymentTransaction"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO payment_transaction (
+            order_id,
+            order_no,
+            user_id,
+            pay_channel,
+            amount,
+            third_trade_no,
+            status,
+            remark
+        ) VALUES (
+            #{orderId},
+            #{orderNo},
+            #{userId},
+            #{payChannel},
+            #{amount},
+            #{thirdTradeNo},
+            #{status},
+            #{remark}
+        )
+    </insert>
+
+    <update id="updateStatus" parameterType="com.charge.entity.PaymentTransaction">
+        UPDATE payment_transaction
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="thirdTradeNo != null">third_trade_no = #{thirdTradeNo},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectById" resultMap="PaymentTransactionResultMap">
+        SELECT
+            id, order_id, order_no, user_id, pay_channel, amount,
+            third_trade_no, status, remark, created_time, updated_time
+        FROM payment_transaction
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByOrderId" resultMap="PaymentTransactionResultMap">
+        SELECT
+            id, order_id, order_no, user_id, pay_channel, amount,
+            third_trade_no, status, remark, created_time, updated_time
+        FROM payment_transaction
+        WHERE order_id = #{orderId}
+        ORDER BY created_time ASC
+    </select>
+
+    <select id="selectByThirdTradeNo" resultMap="PaymentTransactionResultMap">
+        SELECT
+            id, order_id, order_no, user_id, pay_channel, amount,
+            third_trade_no, status, remark, created_time, updated_time
+        FROM payment_transaction
+        WHERE third_trade_no = #{thirdTradeNo}
+    </select>
+
+</mapper>

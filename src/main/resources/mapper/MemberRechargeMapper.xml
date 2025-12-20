@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.charge.mapper.MemberRechargeMapper">
+
+    <resultMap id="MemberRechargeResultMap" type="com.charge.entity.MemberRecharge">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="rechargeNo" column="recharge_no"/>
+        <result property="amount" column="amount"/>
+        <result property="bonusAmount" column="bonus_amount"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="payChannel" column="pay_channel"/>
+        <result property="payStatus" column="pay_status"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="memberUpgraded" column="member_upgraded"/>
+        <result property="remark" column="remark"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="updatedTime" column="updated_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.charge.entity.MemberRecharge" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO member_recharge (
+            user_id,
+            recharge_no,
+            amount,
+            bonus_amount,
+            total_amount,
+            pay_status,
+            member_upgraded,
+            remark
+        ) VALUES (
+            #{userId},
+            #{rechargeNo},
+            #{amount},
+            #{bonusAmount},
+            #{totalAmount},
+            #{payStatus},
+            #{memberUpgraded},
+            #{remark}
+        )
+    </insert>
+
+    <update id="updatePayStatus" parameterType="com.charge.entity.MemberRecharge">
+        UPDATE member_recharge
+        SET pay_status = #{payStatus},
+            pay_channel = #{payChannel},
+            pay_time = #{payTime},
+            member_upgraded = #{memberUpgraded}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectByRechargeNo" resultMap="MemberRechargeResultMap">
+        SELECT
+            id, user_id, recharge_no, amount, bonus_amount, total_amount,
+            pay_channel, pay_status, pay_time, member_upgraded, remark,
+            created_time, updated_time
+        FROM member_recharge
+        WHERE recharge_no = #{rechargeNo}
+    </select>
+
+    <select id="selectById" resultMap="MemberRechargeResultMap">
+        SELECT
+            id, user_id, recharge_no, amount, bonus_amount, total_amount,
+            pay_channel, pay_status, pay_time, member_upgraded, remark,
+            created_time, updated_time
+        FROM member_recharge
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByUserId" resultMap="MemberRechargeResultMap">
+        SELECT
+            id, user_id, recharge_no, amount, bonus_amount, total_amount,
+            pay_channel, pay_status, pay_time, member_upgraded, remark,
+            created_time, updated_time
+        FROM member_recharge
+        WHERE user_id = #{userId}
+        ORDER BY created_time DESC
+    </select>
+
+    <select id="sumTotalRechargeByUserId" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(total_amount), 0)
+        FROM member_recharge
+        WHERE user_id = #{userId}
+          AND pay_status = 1
+    </select>
+
+</mapper>

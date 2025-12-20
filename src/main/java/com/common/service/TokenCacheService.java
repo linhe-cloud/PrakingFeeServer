@@ -37,15 +37,15 @@ public class TokenCacheService {
      *
      * @param username 用户名
      * @param token    JWT Token
-     * @param userInfo 用户信息对象
+     * @param userInfo 用户信息对象（注意：这里只存储用户名，不存储整个UserDetails对象）
      */
     public void storeToken(String username, String token, Object userInfo) {
         try {
             String tokenKey = TOKEN_PREFIX + token;
             String userTokensKey = USER_TOKENS_PREFIX + username;
 
-            // 存储 Token 对应的用户信息
-            redisService.set(tokenKey, userInfo, tokenExpiration);
+            // 只存储用户名，避免UserDetails序列化问题
+            redisService.set(tokenKey, username, tokenExpiration);
 
             // 将 Token 添加到用户的 Token 列表中
             redisService.sSet(userTokensKey, token);
